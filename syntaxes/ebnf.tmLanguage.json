@@ -1,0 +1,21 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "EBNF",
+	"patterns": [
+		{	"include": "#comment"	}
+	],
+	
+	"repository": {
+		"comment": {
+			"name": "comment.block.ebnf",
+			"begin": "\/\\*",
+			"end": "\\*\/",
+			"beginCaptures": { "0": { "name": "markup.punctuation.comment.begin.ebnf" } },
+			"endCaptures": { "0": {  "name": "markup.punctuation.comment.end.ebnf" } },
+			"patterns": [
+				{ "include": "#comment" }
+			]
+		}
+	},
+	"scopeName": "source.ebnf"
+}
