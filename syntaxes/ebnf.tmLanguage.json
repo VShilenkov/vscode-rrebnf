@@ -1,21 +1,163 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "EBNF",
-	"patterns": [
-		{	"include": "#comment"	}
-	],
-	
-	"repository": {
-		"comment": {
-			"name": "comment.block.ebnf",
-			"begin": "\/\\*",
-			"end": "\\*\/",
-			"beginCaptures": { "0": { "name": "markup.punctuation.comment.begin.ebnf" } },
-			"endCaptures": { "0": {  "name": "markup.punctuation.comment.end.ebnf" } },
-			"patterns": [
-				{ "include": "#comment" }
-			]
-		}
-	},
-	"scopeName": "source.ebnf"
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "EBNF",
+    "patterns": [
+        {   "include": "#comment"   },
+        {   "include": "#production"    }
+    ],
+    
+    "repository": {
+        "comment": {
+            "name": "comment.block.ebnf",
+            "begin": "\/\\*",
+            "end": "\\*\/",
+            "beginCaptures": { "0": { "name": "markup.punctuation.comment.begin.ebnf" } },
+            "endCaptures": { "0": {  "name": "markup.punctuation.comment.end.ebnf" } },
+            "patterns": [
+                { "include": "#comment" }
+            ]
+        },
+        "production" : {
+            "name": "rule.ebnf",
+            "begin": "^[\\\\x09\\\\x0A\\\\x0D\\\\x20]*([_A-Za-z\\\\xC0-\\\\xD6][-_A-Za-z\\\\xC0-\\\\xD6]+)\\s",
+            "end": "^$",
+            "beginCaptures": { "1" : { "name" : "entity.name.declaration.ebnf" } },
+            "patterns": [
+                {
+                    "name": "rule.definition.ebnf",
+                    "begin": "(::=)([^|]+)(?:(\\|)([^|]+))*",
+                    "while" : "(\\|)([^|]+)",
+                    "beginCaptures": { 
+                        "1" : { "name" : "keyword.operator.new.ebnf" },
+                        "2" : {
+                            "patterns": [
+                                { "include": "#comment" },
+                                { "include": "#sequenceOrDifference" }
+                            ]
+                        },
+                        "3" : { "name" : "keyword.operator.ebnf" },
+                        "4" : {
+                            "patterns": [
+                                { "include": "#comment" },
+                                { "include": "#sequenceOrDifference" }
+                            ]
+                        }
+                    },
+                    "whileCaptures": {
+                        "1" : { "name" : "keyword.operator.ebnf" },
+                        "2" : {
+                            "patterns": [
+                                { "include": "#comment" },
+                                { "include": "#sequenceOrDifference" }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "sequenceOrDifference": {
+            "name": "sequenceOrDifference.ebnf",
+            "patterns": [
+                { "include": "#comment" },
+                {
+                    "name" : "difference.ebnf",
+                    "match": "(\\S+)\\s+-\\s+(\\S+)",
+                    "captures": {
+                        "1" : { "patterns": [ {"include": "#item"} ] },
+                        "2" : { "patterns": [ {"include": "#item"} ] }
+                    }
+                },
+                {
+                    "name" : "sequence.ebnf",
+                    "match": "(\\S+)(?:\\G\\s+(\\S+))*",
+                    "captures": {
+                        "1" : { "patterns": [ {"include": "#item"} ] },
+                        "2" : { "patterns": [ {"include": "#item"} ] }
+                    }
+                }
+            ]
+        },
+        "item": {
+            "name": "item.ebnf",
+            "match": "([^?+*]+)([?+*]*)",
+            "captures": {
+                "1" : { "patterns": [ { "include": "#primary" }] },
+                "2" : { "name" : "keyword.operator.ebnf" }
+            }
+        },
+        "primary" :{
+            "name": "primary.ebnf",
+            "patterns": [
+                { "include": "#entity" },
+                { "include": "#stringLiteral" },
+                { "include": "#charCode" },
+                { "include": "#charClass" },
+                { 
+                    "begin": "\\(",
+                    "end": "\\)",
+                    "patterns": [
+                        {
+                            "include": "#primary"
+                        }
+                    ]
+                }
+            ]
+        },
+        "entity" : {
+            "name" : "entity.name.ebnf",
+            "match": "[_A-Za-z\\\\xC0-\\\\xD6][-_A-Za-z\\\\xC0-\\\\xD6]+"
+        },
+        "stringLiteral" : {
+            "name": "string.ebnf",
+            "patterns": [
+                { "include": "#stringQuotedDouble" },
+                { "include": "#stringQuotedSingle" }
+            ]
+        },
+        "stringQuotedDouble" : {
+            "name" : "string.quoted.double.ebnf",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.ebnf",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "stringQuotedSingle" : {
+            "name" : "string.quoted.single.ebnf",
+            "begin": "'",
+            "end": "'",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.ebnf",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "charCode" :{
+            "name" : "constant.character.ebnf",
+            "match": "#x[0-9a-fA-F]+"
+        },
+        "charClass" :{
+            "name": "constant.character.class.ebnf",
+            "begin": "\\[(\\^*)",
+            "end": "\\]",
+            "patterns": [
+                { "include": "#char" },
+                { "include": "#charCode" },
+                { "include": "#charRange" }
+            ]
+        },
+        "char" :{
+            "name" : "constant.character.ebnf",
+            "match": "[\\\\x09\\\\x0A\\\\x0D\\\\x20-\\\\xFF]"
+        },
+        "charRange" :{
+            "name" : "constant.character.range.ebnf",
+            "match": "([\\\\x09\\\\x0A\\\\x0D\\\\x20-\\\\xFF]-[^-]|#x[0-9a-fA-F]+-#x[0-9a-fA-F]+"
+        }
+    },
+    "scopeName": "source.ebnf"
 }
