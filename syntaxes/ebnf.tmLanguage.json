@@ -3,72 +3,64 @@
     "name": "EBNF",
     "patterns": [
         {   "include": "#comment"   },
-        {   "include": "#production"    }
+        {   "include": "#production"    },
+        {   "include": "#testRule"  }
     ],
     
     "repository": {
         "comment": {
-            "name": "comment.block.ebnf",
-            "begin": "\/\\*",
-            "end": "\\*\/",
-            "beginCaptures": { "0": { "name": "markup.punctuation.comment.begin.ebnf" } },
-            "endCaptures": { "0": {  "name": "markup.punctuation.comment.end.ebnf" } },
+            "name":     "comment.block.ebnf",
+            "begin":    "(?:(?<=(?:\\s|^)))\/\\*(?:(?=(?:\\s|$)))",
+            "end":      "\\*\/",
+            "beginCaptures":    {   "0": {  "name": "markup.punctuation.comment.begin.ebnf" }   },
+            "endCaptures":      {   "0": {  "name": "markup.punctuation.comment.end.ebnf"   }   },
             "patterns": [
-                { "include": "#comment" }
+                {   "include": "#comment"   }
             ]
         },
-        "production" : {
-            "name": "rule.ebnf",
-            "begin": "^[\\\\x09\\\\x0A\\\\x0D\\\\x20]*([_A-Za-z\\\\xC0-\\\\xD6][-_A-Za-z\\\\xC0-\\\\xD6]+)\\s",
-            "end": "^$",
-            "beginCaptures": { "1" : { "name" : "entity.name.declaration.ebnf" } },
+        "production": {
+            "name":     "internal.production.ebnf",
+            "begin":    "^\\s*([:_a-zA-Z][-._0-9a-zA-Z]*)",
+            "end":      "$^",
+            "contentName":      "internal.production.content.ebnf",
+            "beginCaptures":    {   "1": {  "name": "entity.name.declaration.ebnf"  }   },
             "patterns": [
+                {   "include": "#choice"   }
+            ]
+        },
+        "choice": {
+            "name":     "internal.choice.ebnf",
+            "begin":    "(::=)",
+            "end":      "^$",
+            "contentName":      "internal.choice.content.ebnf",
+            "beginCaptures":    {   "1": {  "name": "keyword.operator.new.ebnf"  }   },
+            "patterns": [
+                {   "include": "#comment"   },
                 {
-                    "name": "rule.definition.ebnf",
-                    "begin": "(::=)([^|]+)(?:(\\|)([^|]+))*",
-                    "while" : "(\\|)([^|]+)",
-                    "beginCaptures": { 
-                        "1" : { "name" : "keyword.operator.new.ebnf" },
-                        "2" : {
-                            "patterns": [
-                                { "include": "#comment" },
-                                { "include": "#sequenceOrDifference" }
-                            ]
-                        },
-                        "3" : { "name" : "keyword.operator.ebnf" },
-                        "4" : {
-                            "patterns": [
-                                { "include": "#comment" },
-                                { "include": "#sequenceOrDifference" }
-                            ]
-                        }
+                    "name": "internal.sequenceOrDifferenceSequence.ebnf",
+                    "begin": "((?:[^|]|(?:(?<!\\s)\\|(?!\\s)))+)",
+                    "end": "(\\|)\\s|^$",
+                    "beginCaptures": {  "1": {  "patterns": [   {   "include": "#sequenceOrDifference"  }   ]   }
                     },
-                    "whileCaptures": {
-                        "1" : { "name" : "keyword.operator.ebnf" },
-                        "2" : {
-                            "patterns": [
-                                { "include": "#comment" },
-                                { "include": "#sequenceOrDifference" }
-                            ]
-                        }
-                    }
+                    "endCaptures": { "1": {  "name": "keyword.operator.alternative.ebnf"  } }
                 }
             ]
         },
         "sequenceOrDifference": {
-            "name": "sequenceOrDifference.ebnf",
+            "name": "internal.sequenceOrDifference.ebnf",
             "patterns": [
                 { "include": "#comment" },
                 {
-                    "name" : "difference.ebnf",
-                    "match": "(\\S+)\\s+-\\s+(\\S+)",
+                    "name" : "internal.difference.ebnf",
+                    "match": "(\\S+)\\s+(-)\\s+(\\S+)",
                     "captures": {
                         "1" : { "patterns": [ {"include": "#item"} ] },
-                        "2" : { "patterns": [ {"include": "#item"} ] }
+                        "2" : {  "name": "keyword.operator.difference.ebnf"  },
+                        "3" : { "patterns": [ {"include": "#item"} ] }
                     }
                 },
                 {
-                    "name" : "sequence.ebnf",
+                    "name" : "internal.sequence.ebnf",
                     "match": "(\\S+)(?:\\G\\s+(\\S+))*",
                     "captures": {
                         "1" : { "patterns": [ {"include": "#item"} ] },
@@ -78,18 +70,19 @@
             ]
         },
         "item": {
-            "name": "item.ebnf",
-            "match": "([^?+*]+)([?+*]*)",
+            "name": "internal.item.ebnf",
+            "match": "((?:[?+*](?![?+*]*(?:\\Z|$))|[^?*+])+)([?*+]*)",
             "captures": {
                 "1" : { "patterns": [ { "include": "#primary" }] },
-                "2" : { "name" : "keyword.operator.ebnf" }
+                "2" : { "name" : "keyword.operator.quantifier.ebnf" }
             }
         },
         "primary" :{
             "name": "primary.ebnf",
             "patterns": [
-                { "include": "#entity" },
+                { "include": "#comment" },
                 { "include": "#stringLiteral" },
+                { "include": "#entity" },
                 { "include": "#charCode" },
                 { "include": "#charClass" },
                 { 
@@ -97,7 +90,7 @@
                     "end": "\\)",
                     "patterns": [
                         {
-                            "include": "#primary"
+                            "include": "#choice"
                         }
                     ]
                 }
@@ -105,7 +98,49 @@
         },
         "entity" : {
             "name" : "entity.name.ebnf",
-            "match": "[_A-Za-z\\\\xC0-\\\\xD6][-_A-Za-z\\\\xC0-\\\\xD6]+"
+            "match": "[:_a-zA-Z][-._0-9a-zA-Z]*"
+        },
+        "charCode" :{
+            "name" : "constant.character.code.ebnf",
+            "match": "#x[0-9a-fA-F]+"
+        },
+        "charClass" :{
+            "name": "constant.character.class.ebnf",
+            "begin": "(\\[)(\\s*\\^)?",
+            "end": "(\\])",
+            "beginCaptures": {
+                "1": {  "name": "keyword.operator.grouping.ebnf"    },
+                "2": {  "name": "keyword.operator.negation.ebnf"    }
+            },
+            "endCaptures":      { "1": { "name": "keyword.operator.grouping.ebnf" }    },
+            "patterns": [
+                { "include": "#charCode" },
+                { "include": "#char" },
+                { "include": "#charRange" },
+                { "include": "#charCodeRange" }
+            ]
+        },
+        "char" :{
+            "name" : "constant.character.ebnf",
+            "match": "[\\\\x09\\\\x0A\\\\x0D\\\\x20-\\\\xFF]"
+        },
+        "charRange" :{
+            "name" : "constant.character.range.ebnf",
+            "match": "([\\\\x09\\\\x0A\\\\x0D\\\\x20-\\\\xFF])\\s*(-)\\s*([\\\\x09\\\\x0A\\\\x0D\\\\x20-\\\\x2C\\\\x2D-\\\\xFF])",
+            "captures": {
+                "1" : { "name":  "constant.character.ebnf" },
+                "2" : { "name":  "keyword.operator.difference.ebnf" },
+                "3" : { "name":  "constant.character.ebnf" }
+            }
+        },
+        "charCodeRange" :{
+            "name" : "constant.character.range.ebnf",
+            "match": "(#x[0-9a-fA-F]+)\\s*(-)\\s*(#x[0-9a-fA-F]+)",
+            "captures": {
+                "1" : { "name":  "constant.character.code.ebnf" },
+                "2" : { "name":  "keyword.operator.difference.ebnf" },
+                "3" : { "name":  "constant.character.code.ebnf" }
+            }
         },
         "stringLiteral" : {
             "name": "string.ebnf",
@@ -116,8 +151,8 @@
         },
         "stringQuotedDouble" : {
             "name" : "string.quoted.double.ebnf",
-            "begin": "\"",
-            "end": "\"",
+            "begin": "(?:(?<=(?:\\s|^)))\"",
+            "end": "\"(?:(?=(?:\\s|$)))",
             "patterns": [
                 {
                     "name": "constant.character.escape.ebnf",
@@ -127,8 +162,8 @@
         },
         "stringQuotedSingle" : {
             "name" : "string.quoted.single.ebnf",
-            "begin": "'",
-            "end": "'",
+            "begin": "(?:(?<=(?:\\s|^)))'",
+            "end": "'(?:(?=(?:\\s|$)))",
             "patterns": [
                 {
                     "name": "constant.character.escape.ebnf",
@@ -136,28 +171,11 @@
                 }
             ]
         },
-        "charCode" :{
-            "name" : "constant.character.ebnf",
-            "match": "#x[0-9a-fA-F]+"
-        },
-        "charClass" :{
-            "name": "constant.character.class.ebnf",
-            "begin": "\\[(\\^*)",
-            "end": "\\]",
-            "patterns": [
-                { "include": "#char" },
-                { "include": "#charCode" },
-                { "include": "#charRange" }
-            ]
-        },
-        "char" :{
-            "name" : "constant.character.ebnf",
-            "match": "[\\\\x09\\\\x0A\\\\x0D\\\\x20-\\\\xFF]"
-        },
-        "charRange" :{
-            "name" : "constant.character.range.ebnf",
-            "match": "([\\\\x09\\\\x0A\\\\x0D\\\\x20-\\\\xFF]-[^-]|#x[0-9a-fA-F]+-#x[0-9a-fA-F]+"
+        "testRule" : {
+            "name" : "testRule.ebnf",
+            "match": "[\\\\xF8-\\\\x{02FF}]+"
         }
+
     },
     "scopeName": "source.ebnf"
 }

@@ -1,5 +1,47 @@
 {
     "cSpell.words": [
         "ebnf"
-    ]
+    ],
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "entity.name.declaration.ebnf",
+                "settings": {
+                    "foreground": "#ff9404",
+                    "fontStyle": "bold"
+                }
+            },
+            {
+                "scope": "entity.name.ebnf",
+                "settings": {
+                    "foreground": "#4ea5b6",
+                }
+            },
+            {
+                "scope": "keyword.operator.new.ebnf",
+                "settings": {
+                    "foreground": "#3875d7",
+                }
+            },
+            {
+                "scope": "keyword.operator.alternative.ebnf",
+                "settings": {
+                    "foreground": "#b4e4fd",
+                }
+            },
+            {
+                "scope": "keyword.operator.quantifier.ebnf",
+                "settings": {
+                    "foreground": "#c0a0f3",
+                    "fontStyle": "bold"
+                }
+            },
+            {
+                "scope": "keyword.operator.difference.ebnf",
+                "settings": {
+                    "foreground": "#7cbdf1",
+                }
+            },
+        ]
+    }
 }
