@@ -170,12 +170,7 @@
                     "match": "\\\\."
                 }
             ]
-        },
-        "testRule" : {
-            "name" : "testRule.ebnf",
-            "match": "[\\\\xF8-\\\\x{02FF}]+"
         }
-
     },
     "scopeName": "source.ebnf"
 }
