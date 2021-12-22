@@ -1,7 +1,7 @@
 {
     "name": "rrebnf",
     "displayName": "rrebnf",
-    "description": "local",
+    "description": "EBNF HighLighting",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.63.0"

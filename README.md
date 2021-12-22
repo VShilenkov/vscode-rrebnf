@@ -1,75 +1,92 @@
-# rrebnf README
+# vscode-rrebnf
 
-This is the README for your extension "rrebnf". After writing up a brief description, we recommend including the following sections.
+This VSCode extension provides Extended Backus–Naur Form syntax highlighting.
+
+Grammar is taken from [Railroad Diagram Generator](https://www.bottlecaps.de/rr/ui)
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- Provides syntax highlighting for files with extension '.ebnf'
 
-For example if there is an image subfolder under your extension project workspace:
+![RR EBNF Grammar](images/screen.rrebnf.png)
 
-\!\[feature X\]\(images/feature-x.png\)
+- Colours maybe customized by adopting `settings.json`
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Screenshot above was taken with using the following theme customization:
+```json
+{
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "entity.name.declaration.ebnf",
+                "settings": {
+                    "foreground": "#ff9404",
+                    "fontStyle": "bold"
+                }
+            },
+            {
+                "scope": "entity.name.ebnf",
+                "settings": {
+                    "foreground": "#4ea5b6",
+                }
+            },
+            {
+                "scope": "keyword.operator.new.ebnf",
+                "settings": {
+                    "foreground": "#3875d7",
+                }
+            },
+            {
+                "scope": "keyword.operator.alternative.ebnf",
+                "settings": {
+                    "foreground": "#b4e4fd",
+                }
+            },
+            {
+                "scope": "keyword.operator.quantifier.ebnf",
+                "settings": {
+                    "foreground": "#c0a0f3",
+                    "fontStyle": "bold"
+                }
+            },
+            {
+                "scope": "keyword.operator.difference.ebnf",
+                "settings": {
+                    "foreground": "#7cbdf1",
+                }
+            },
+        ]
+    }
+}
+```
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- It is required to split every rule with blank line
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
+- No settings provided
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Grammar doesn't recognize links
+- Used non standard token classes
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
+- initial release with more or less stable tokenization
 
-Initial release of ...
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
 
 -----------------------------------------------------------------------------------------------------------
 
-## Working with Markdown
 
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
-
-
-### Useful links
+### Links which were useful during development
 
 * [syntax: ONIG_SYNTAX_ONIGURUMA (default syntax)](https://github.com/kkos/oniguruma/blob/master/doc/RE)
 * [rubular](https://rubular.com/)
 * [A guide to writing a language grammar (TextMate) in Atom](https://gist.github.com/Aerijo/b8c82d647db783187804e86fa0a604a1)
 * [Writing a TextMate Grammar: Some Lessons Learned](https://www.apeth.com/nonblog/stories/textmatebundle.html)
-* [Notes on how to create a Language Grammar and Custom Theme for a Textmate Bundle](https://benparizek.com/notebook/notes-on-how-to-create-a-language-grammar-and-custom-theme-for-a-textmate-bundle
-* )
+* [Notes on how to create a Language Grammar and Custom Theme for a Textmate Bundle](https://benparizek.com/notebook/notes-on-how-to-create-a-language-grammar-and-custom-theme-for-a-textmate-bundle)
