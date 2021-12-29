@@ -60,9 +60,19 @@ Screenshot above was taken with using the following theme customization:
 }
 ```
 
+- Provides diagnostics
+  - Used but undefined tokens
+
+![undefined](images/diagnostisc.undefined.tokens.png)
+
+  - Redefined tokens
+
+![redefined](images/diagnostics.redefinition.png)
+
 ## Requirements
 
 - It is required to split every rule with blank line
+- requires [HyperScopes](https://marketplace.visualstudio.com/items?itemName=draivin.hscopes) extension installed
 
 ## Extension Settings
 
@@ -71,9 +81,12 @@ Screenshot above was taken with using the following theme customization:
 
 - Grammar doesn't recognize links
 - Used non standard token classes
+- HyperScopes extension works not perfectly and provides not reliable output ([hscopes/issues/2](https://github.com/draivin/hscopes/issues/2)). Diagnostics features may require another approach for implementation.
 
 ## Release Notes
 
+### 0.0.2
+- experimental diagnostics implementation
 ### 0.0.1
 
 - initial release with more or less stable tokenization
