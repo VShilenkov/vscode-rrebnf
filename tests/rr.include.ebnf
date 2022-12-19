@@ -1,0 +1,7 @@
+#include "rr.syntax.ebnf" /* me also is a comment */
+
+include ::= [a-z]
+
+it ::= include "some.unknown.file.ebnf"
+
+/* here are just comments */

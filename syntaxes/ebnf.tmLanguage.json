@@ -2,12 +2,26 @@
     "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
     "name": "EBNF",
     "patterns": [
-        {   "include": "#comment"   },
+        {   "include": "#pp_directive"  },
+        {   "include": "#comment"       },
         {   "include": "#production"    },
-        {   "include": "#testRule"  }
+        {   "include": "#invalid"       }
     ],
     
     "repository": {
+        "pp_directive" : {
+            "patterns": [
+                {
+                    "name" : "internal.preprocessor.ebnf",
+                    "match": "^(#include)\\s(\".*?\")",
+                    "captures": {
+                        "1" : { "name" : "keyword.other.ebnf" },
+                        "2" : { "name" : "string.other.ebnf" }
+                    }
+                },
+                {   "include": "#comment"   }
+            ]
+        },
         "comment": {
             "name":     "comment.block.ebnf",
             "begin":    "(?:(?<=(?:\\s|^)))\/\\*(?:(?=(?:\\s|$)))",
@@ -169,6 +183,12 @@
                     "name": "constant.character.escape.ebnf",
                     "match": "\\\\."
                 }
+            ]
+        },
+        "invalid" : {
+            "name" : "invalid.illegal",
+            "patterns": [
+                { "match" : "#[^x]" }
             ]
         }
     },
