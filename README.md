@@ -85,6 +85,8 @@ Screenshot above was taken with using the following theme customization:
 
 ## Release Notes
 
+### 0.0.3
+- support for preprocessor directive ``#include``
 ### 0.0.2
 - experimental diagnostics implementation
 ### 0.0.1
