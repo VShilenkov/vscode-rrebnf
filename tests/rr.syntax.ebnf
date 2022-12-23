@@ -1,3 +1,6 @@
+#ifndef TESTS_RR_SYNTAX_EBNF
+#define TESTS_RR_SYNTAX_EBNF
+
 Grammar ::= Production*
 
 Production ::= NCName '::=' ( Choice | Link )
@@ -33,3 +36,5 @@ Whitespace ::= S | Comment
 S ::= #x9 | #xA | #xD | #x20
 
 Comment ::= '/*' ( [^*] | '*' + [^*/] )* '*'* '*/'                              /* ws: explicit */
+
+#endif /* TESTS_RR_SYNTAX_EBNF */

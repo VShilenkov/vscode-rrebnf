@@ -13,11 +13,22 @@
             "patterns": [
                 {
                     "name" : "internal.preprocessor.ebnf",
-                    "match": "^(#include)\\s(\".*?\")",
-                    "captures": {
-                        "1" : { "name" : "keyword.other.ebnf" },
-                        "2" : { "name" : "string.other.ebnf" }
-                    }
+                    "patterns": [
+                        {
+                            "match": "^(#include)\\s+(\".*?\")",
+                            "captures": {
+                                "1": {  "name": "keyword.other.ebnf"    },
+                                "2": {  "name": "string.other.ebnf"     }
+                            }
+                        },
+                        {
+                            "match": "^(#ifndef|#define)\\s+([_A-Za-z0-9]+)",
+                            "captures": {
+                                "1": {  "name": "keyword.other.ebnf"    },
+                                "2": {  "name": "string.other.ebnf"     }
+                            }
+                        }
+                    ]
                 },
                 {   "include": "#comment"   }
             ]

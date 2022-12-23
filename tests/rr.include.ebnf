@@ -1,3 +1,5 @@
+#ifndef TESTS_RR_INCLUDE_EBNF
+#define TESTS_RR_INCLUDE_EBNF
 #include "rr.syntax.ebnf" /* me also is a comment */
 
 include ::= [a-z]
@@ -5,3 +7,5 @@ include ::= [a-z]
 it ::= include "some.unknown.file.ebnf"
 
 /* here are just comments */
+
+#endif /* TESTS_RR_INCLUDE_EBNF */
