@@ -2,7 +2,7 @@
     "name": "vscode-rrebnf",
     "displayName": "EBNF HighLighting",
     "description": "EBNF HighLighting RRDG grammar",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "VShilenkov",
     "engines": {
         "vscode": "^1.63.0"

@@ -85,6 +85,10 @@ Screenshot above was taken with using the following theme customization:
 
 ## Release Notes
 
+### 0.0.4
+- include guard support (``ifndef`` ``define`` ``endif``)
+- tests
+
 ### 0.0.3
 - support for preprocessor directive ``#include``
 ### 0.0.2
