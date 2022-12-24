@@ -1,0 +1,12 @@
+#ifndef TESTS_CXX_STD_EXPR_UNQUALIFIED_ID_EBNF
+#define TESTS_CXX_STD_EXPR_UNQUALIFIED_ID_EBNF
+
+unqualified-id ::= identifier
+                 | operator-function-id
+                 | conversion-function-id
+                 | literal-operator-id
+                 | '~' type-name
+                 | '~' decltype-specifier
+                 | template-id
+
+#endif /* TESTS_CXX_STD_EXPR_UNQUALIFIED_ID_EBNF */

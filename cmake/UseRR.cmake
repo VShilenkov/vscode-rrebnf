@@ -1,138 +1,136 @@
+include_guard(GLOBAL)
+
+if(TARGET all_rr)
+    return()
+endif()
+
+set(CF_lp_UseRR "[UseRR]:")
+
 
 # required to be able to run preprocessing on *.ebnf files
-if(NOT CMAKE_C_COMPILER)
+if(NOT CMAKE_CXX_COMPILER)
     enable_language(CXX)
 endif()
 
 if(NOT DEFINED RR_COMMAND)
-    message(FATAL_ERROR "Railroad diagram generator tool not found. Use `find_package(RR)`")
+    message(FATAL_ERROR "${CF_lp_UseRR} Railroad diagram generator tool not found. Use `find_package(RR)`")
 endif()
 
-macro(generate_rr)
-    set(key_value DESTINATION)
-    set(key_multivalue SOURCES INCLUDE_DIRECTORIES)
-    cmake_parse_arguments(_generate_rr_args "" "${key_value}" "${key_multivalue}" ${ARGN})
+add_custom_target(all_rr)
 
-    if(NOT DEFINED _generate_rr_args_SOURCES OR NOT _generate_rr_args_SOURCES)
-        message(FATAL_ERROR "SOURCES is mandatory field to generate_rr macro")
+macro(add_rr add_rr_args_TARGET)
+    set(cmpa_key_value      DESTINATION)
+    set(cmpa_key_multivalue SOURCES INCLUDE_DIRECTORIES)
+    cmake_parse_arguments(add_rr_args
+                          ""
+                          "${cmpa_key_value}"
+                          "${cmpa_key_multivalue}"
+                          ${ARGN}
+    )
+
+    if(TARGET ${add_rr_args_TARGET})
+        message(FATAL_ERROR "${CF_lp_UseRR} Target ${add_rr_args_TARGET} is alaready defined")
     endif()
 
-    if(NOT DEFINED _generate_rr_args_DESTINATION OR NOT _generate_rr_args_DESTINATION)
-        message(FATAL_ERROR "DESTINATION is mandatory field to generate_rr macro")
+    if(NOT DEFINED add_rr_args_SOURCES)
+        message(FATAL_ERROR "${CF_lp_UseRR} Omitted mandatory parameter `SOURCES`")
+    elseif(add_rr_args_SOURCES STREQUAL "")
+        message(FATAL_ERROR "${CF_lp_UseRR} Values for parameter `SOURCES` are missing")
     endif()
 
+    if(NOT DEFINED add_rr_args_DESTINATION)
+        message(FATAL_ERROR "${CF_lp_UseRR} Omitted mandatory parameter `DESTINATION`")
+    elseif()
+        message(FATAL_ERROR "${CF_lp_UseRR} Value for parameter `DESTINATION` is missing")
+    endif()
 
-    set(_sources_to_process "")
-    foreach(_source IN LISTS _generate_rr_args_SOURCES)
+    # process SOURCES
+    set(_rr_SOURCES "")
+    foreach(_source IN LISTS add_rr_args_SOURCES)
         cmake_path(IS_RELATIVE _source _is_relative)
         if(_is_relative)
-            cmake_path(ABSOLUTE_PATH _source)
+            cmake_path(ABSOLUTE_PATH _source NORMALIZE)
         endif()
 
         if(NOT EXISTS "${_source}")
-            message(FATAL_ERROR "source file provided cannot be found: ${_source}")
+            message(FATAL_ERROR "${CF_lp_UseRR} SOURCES contains not existing file: ${_source}")
         endif()
-        list(APPEND _sources_to_process "${_source}")
+        list(APPEND _rr_SOURCES "${_source}")
     endforeach()
-    
-    if(NOT EXISTS "${_generate_rr_args_DESTINATION}" OR NOT IS_DIRECTORY "${_generate_rr_args_DESTINATION}")
-        file(MAKE_DIRECTORY ${_generate_rr_args_DESTINATION})
+    list(REMOVE_DUPLICATES _rr_SOURCES)
+
+    # process DESTINATION
+    cmake_path(IS_RELATIVE add_rr_args_DESTINATION _is_relative)
+    if(_is_relative)
+        cmake_path(ABSOLUTE_PATH add_rr_args_DESTINATION NORMALIZE)
+    endif()
+    if(NOT (EXISTS "${add_rr_args_DESTINATION}" AND IS_DIRECTORY "${add_rr_args_DESTINATION}"))
+        file(MAKE_DIRECTORY "${add_rr_args_DESTINATION}")
     endif()
 
-    set(_rr_include_directories "")
-    foreach(rr_inc_dir IN LISTS _generate_rr_args_INCLUDE_DIRECTORIES)
-        cmake_path(IS_RELATIVE rr_inc_dir _is_relative)
+    # process INCLUDE_DIRECTORIES
+    ## add current location to includes
+    set(_rr_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}")
+    foreach(_dir IN LISTS add_rr_args_INCLUDE_DIRECTORIES)
+        cmake_path(IS_RELATIVE _dir _is_relative)
         if(_is_relative)
-            cmake_path(ABSOLUTE_PATH rr_inc_dir)
+            cmake_path(ABSOLUTE_PATH _dir NORMALIZE)
         endif()
 
-        if(NOT EXISTS "${rr_inc_dir}")
-            message(WARNING "Provided include directory doesn't exist ${rr_inc_dir}")
-        elseif(NOT IS_DIRECTORY "${rr_inc_dir}")
-            message(WARNING "Provided include path is not directory ${rr_inc_dir}")
+        if(NOT EXISTS "${_dir}")
+            message(WARNING "${CF_lp_UseRR} `INCLUDE_DIRECTORIES` contains not existing directory: ${_dir}")
+        elseif(NOT IS_DIRECTORY "${_dir}")
+            message(WARNING "${CF_lp_UseRR} `INCLUDE_DIRECTORIES` contains not directory: ${_dir}")
         else()
-            list(APPEND _rr_include_directories "${rr_inc_dir}")
+            list(APPEND _rr_INCLUDE_DIRECTORIES "${_dir}")
         endif()
     endforeach()
+    list(REMOVE_DUPLICATES _rr_INCLUDE_DIRECTORIES)
+    list(TRANSFORM _rr_INCLUDE_DIRECTORIES PREPEND "-I")
 
-    list(TRANSFORM _rr_include_directories PREPEND "-I")
-    list(REMOVE_DUPLICATES _sources_to_process)
+    set(_rr_PRODUCTS "")
+    foreach(_source IN LISTS _rr_SOURCES)
+        cmake_path(GET _source STEM LAST_ONLY _source_full_stem)
 
-    foreach(_source IN LISTS _sources_to_process)
-        cmake_path(GET _source STEM LAST_ONLY full_stem)
-
-        file(STRINGS ${_source} _origin_content NEWLINE_CONSUME)
-        
-        #message(STATUS "${_origin_content}")
-        if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.orign.egnf)
-            file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.orign.egnf)
-        endif()
-
-        string(REPLACE "//" "|double_forwards_slash|" _origin_content "${_origin_content}")
-        #string(REPLACE "'" "|:apostrofe:|" _origin_content "${_origin_content}")
-        #string(REPLACE "\"" "|:quotation:|" _origin_content "${_origin_content}")
-        #string(REPLACE "/*" "|block_comment_starts|" _origin_content "${_origin_content}")
-        #string(REPLACE "*/" "|block_comment_ends|" _origin_content "${_origin_content}")
-        string(REPLACE ";" "|semicolon|" _origin_content "${_origin_content}")
-        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.orign.egnf "${_origin_content}")
-        
-
-        execute_process(COMMAND 
-            ${CMAKE_CXX_COMPILER} -E -C ${_rr_include_directories} -x c++-header ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.orign.egnf -o ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.ppebnf
-            RESULT_VARIABLE _pp_result
-            OUTPUT_VARIABLE _pp_output
-            ERROR_VARIABLE _pp_error
-            COMMAND_ECHO STDOUT
-            ECHO_OUTPUT_VARIABLE
-            ECHO_ERROR_VARIABLE
+        add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.pp.ebnf
+            COMMAND
+                ${CMAKE_CXX_COMPILER}
+                    -E
+                    -C
+                    -x c++-header
+                    ${_rr_INCLUDE_DIRECTORIES}
+                    -o ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.pp.ebnf
+                    ${_source}
+            DEPENDS ${_source}
+            COMMENT "${CF_lp_UseRR} Preprocess ${_source}"
         )
 
-        if(NOT _pp_result EQUAL 0)
-            message(WARNING "Preprocess failed ${_pp_output} ${_pp_error}")
-        endif()
-
-        if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.ppebnf)
-            message(FATAL_ERROR "preprocessed file not generated ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.ppebnf")
-        endif()
-
-        file(READ ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.ppebnf _content ENCODING UTF-8)
-        if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.reworked.ebnf)
-            file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.reworked.ebnf)
-        endif()
-
-        string(REPLACE "\n" ";" _content "${_content}")
-        string(PREPEND _content ";")
-        string(REGEX MATCHALL ";#[^;]*" to_remove "${_content}")
-        list(SORT to_remove ORDER DESCENDING)
-        message(STATUS "${to_remove}")
-        foreach(_line  ${to_remove})
-            #if(_line MATCHES "^[^G].*$")
-                #message(STATUS "${_line}")
-                #message(STATUS "Before")
-                #message(STATUS "${_content}")
-                string(REPLACE "${_line}" ";" _content "${_content}")
-                #message(STATUS "After")
-                #message(STATUS "${_content}")
-                ##file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.ebnf "${_line}")
-            #endif()
-        endforeach()
-
-        #message(STATUS "${_content}")
-        string(REPLACE "|double_forwards_slash|" "//"  _content "${_content}")
-        #string(REPLACE "|block_comment_starts|" "/*"  _content "${_content}")
-        #string(REPLACE "|block_comment_ends|" "*/"  _content "${_content}")
-        #string(REPLACE "|:apostrofe:|" "'" _content "${_content}")
-        #string(REPLACE "|:quotation:|" "\"" _content "${_content}")
-        string(REPLACE ";" "\n" _content "${_content}")
-        string(REPLACE "|semicolon|" ";"  _content "${_content}")
-        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.reworked.ebnf "${_content}")
-
-        execute_process(COMMAND 
-                ${RR_COMMAND} -out:${_generate_rr_args_DESTINATION}/${full_stem}.xhtml ${CMAKE_CURRENT_BINARY_DIR}/${full_stem}.reworked.ebnf
-            RESULT_VARIABLE rr_result
-            OUTPUT_VARIABLE rr_output
-            ERROR_VARIABLE rr_error
+        add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.s.ebnf
+            COMMAND
+                grep
+                    -v "^#"
+                    ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.pp.ebnf > ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.s.ebnf
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.pp.ebnf
+            COMMENT "${CF_lp_UseRR} Sanityze ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.pp.ebnf"
         )
+
+        add_custom_command(OUTPUT ${add_rr_args_DESTINATION}/${_source_full_stem}.xhtml
+            COMMAND
+                ${RR_COMMAND}
+                    -out:${add_rr_args_DESTINATION}/${_source_full_stem}.xhtml
+                    ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.s.ebnf
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_source_full_stem}.s.ebnf
+            COMMENT "${CF_lp_UseRR} Generate ${add_rr_args_DESTINATION}/${_source_full_stem}.xhtml"
+        )
+
+        list(APPEND _rr_PRODUCTS "${add_rr_args_DESTINATION}/${_source_full_stem}.xhtml")
+
     endforeach()
-#  /usr/bin/java -jar /home/vsh/Hearth/sources/git/github.com/VShilenkov/vscode-rrebnf/build/_deps/rr_jar_package-src/rr.war -out:test.xhtml ./tests/rr.syntax.ebnf 
+
+    add_custom_target(${add_rr_args_TARGET}
+        DEPENDS ${_rr_PRODUCTS}
+    )
+
+    add_dependencies(all_rr ${add_rr_args_TARGET})
 endmacro()
+

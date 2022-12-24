@@ -1,0 +1,9 @@
+#ifndef TESTS_CXX_STD_EXPR_ID_EXPRESSION_EBNF
+#define TESTS_CXX_STD_EXPR_ID_EXPRESSION_EBNF
+
+id-expression ::= unqualified-id
+                | qualified-id
+
+#include "unqualified.id.ebnf"
+
+#endif /* TESTS_CXX_STD_EXPR_ID_EXPRESSION_EBNF */

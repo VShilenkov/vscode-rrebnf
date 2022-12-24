@@ -27,6 +27,12 @@
                                 "1": {  "name": "keyword.other.ebnf"    },
                                 "2": {  "name": "string.other.ebnf"     }
                             }
+                        },
+                        {
+                            "match": "^(#endif)",
+                            "captures": {
+                                "1": {  "name": "keyword.other.ebnf"    }
+                            }
                         }
                     ]
                 },

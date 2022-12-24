@@ -1,0 +1,15 @@
+#ifndef TESTS_CXX_STD_EXPR_PRIMARY_EXPRESSION_EBNF
+#define TESTS_CXX_STD_EXPR_PRIMARY_EXPRESSION_EBNF
+
+
+primary-expression ::= literal
+                     | "this"
+                     | '(' expression ')'
+                     | id-expression
+                     | lambda-expression
+                     | fold-expression
+                     | requires-expression
+
+#include "id.expression.ebnf"
+
+#endif /* TESTS_CXX_STD_EXPR_PRIMARY_EXPRESSION_EBNF */
